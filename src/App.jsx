@@ -9,12 +9,17 @@ import { listenAvailability, setAvailability } from "./services/availability"
 export default function App() {
   const { user, loading } = useAuth()
   const [available, setAvailable] = useState(false)
-  const [availabilityLoading, setAvailabilityLoading] = useState(true)
+  
+  // FIX: Start as 'false' (Not Loading). 
+  // This ensures the app opens immediately even if the database is empty.
+  const [availabilityLoading, setAvailabilityLoading] = useState(false)
 
   // Listen to availability
   useEffect(() => {
     if (!user) return
     const unsubscribe = listenAvailability((value) => {
+      // If the database document exists, this updates the toggle.
+      // If it doesn't exist yet, it stays false (Offline).
       setAvailable(value)
       setAvailabilityLoading(false)
     })
@@ -23,10 +28,11 @@ export default function App() {
 
   // Function to toggle status
   async function toggleAvailability() {
+    // This write operation will RECREATE the missing 'availability' collection automatically!
     await setAvailability(!available)
   }
 
-  // 1. Loading State
+  // 1. Loading State (Auth only)
   if (loading) {
     return <div style={{ padding: 20, textAlign: "center" }}>Loading App...</div>
   }
@@ -42,7 +48,6 @@ export default function App() {
   }
 
   // 3. Logged In -> Show Panel
-  // Notice: No buttons here. Just passing data to DoctorPanel.
   return (
     <div className="container">
       <Header />
