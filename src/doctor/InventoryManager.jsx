@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react"
 import { getInventory } from "../services/inventory"
-import PatientHistory from "./PatientHistory"
-import DashboardStats from "./DashboardStats"
-
-// --- RESTORED OLD IMPORTS ---
-import InventoryForm from "./InventoryForm"
-import InventoryList from "./InventoryList"
+// import InventoryForm from "./InventoryForm"  <-- REMOVED
+// import InventoryList from "./InventoryList"  <-- REMOVED
+import InventoryManager from "./InventoryManager" // <-- NEW IMPORT
 import PrescriptionForm from "./PrescriptionForm"
 import BillList from "./BillList"
 
@@ -36,12 +33,13 @@ export default function DoctorPanel({
         <div style={styles.header}>
           <h3 style={styles.title}>Doctor Panel</h3>
           
+          {/* Status Button */}
           <button
             style={{
               ...styles.statusBtn,
               background: available 
-                ? "linear-gradient(135deg, #10b981, #059669)" 
-                : "linear-gradient(135deg, #ef4444, #dc2626)"
+                ? "linear-gradient(135deg, #10b981, #059669)" // Green
+                : "linear-gradient(135deg, #ef4444, #dc2626)"  // Red
             }}
             onClick={onToggleAvailability}
           >
@@ -50,6 +48,7 @@ export default function DoctorPanel({
           </button>
         </div>
 
+        {/* 2x2 Navigation Grid */}
         <div style={styles.grid}>
           <NavButton 
             active={page === "home"} 
@@ -78,27 +77,23 @@ export default function DoctorPanel({
         </div>
       </div>
 
+      {/* Page Content */}
       <div style={styles.contentArea}>
         {page === "home" && (
           <div style={styles.card}>
-            <h3 style={styles.title}>Welcome Dr. Devmurari 👋</h3>
+            <h3 style={styles.title}>Welcome 👋</h3>
             <p style={styles.muted}>
               Select an option from the panel above to manage your clinic.
             </p>
-            {/* 🔥 NEW ANALYTICS DASHBOARD */}
-            <DashboardStats />
-
-            {/* ADDED HERE: */}
-            <PatientHistory />
           </div>
         )}
 
-        {/* --- RESTORED OLD LOGIC --- */}
+        {/* 🔥 NEW INVENTORY MANAGER CONNECTED HERE */}
         {page === "inventory" && (
-          <>
-            <InventoryForm onAdded={loadInventory} />
-            <InventoryList items={inventory} refresh={loadInventory} />
-          </>
+          <InventoryManager 
+            inventory={inventory} 
+            refreshInventory={loadInventory} 
+          />
         )}
 
         {page === "prescription" && (
@@ -114,6 +109,7 @@ export default function DoctorPanel({
   )
 }
 
+// --- SUB-COMPONENT FOR BUTTONS ---
 function NavButton({ active, onClick, icon, label }) {
   return (
     <button
@@ -124,7 +120,6 @@ function NavButton({ active, onClick, icon, label }) {
         color: active ? "white" : "#4f46e5",
         boxShadow: active ? "0 4px 12px rgba(79, 70, 229, 0.3)" : "none",
         transform: active ? "scale(1.02)" : "scale(1)",
-        border: active ? "none" : "1px solid #e0e7ff"
       }}
     >
       <span style={{ fontSize: "24px", marginBottom: "4px" }}>{icon}</span>
@@ -133,6 +128,7 @@ function NavButton({ active, onClick, icon, label }) {
   )
 }
 
+// --- STYLES OBJECT (CSS-in-JS) ---
 const styles = {
   appContainer: {
     maxWidth: "500px",
@@ -147,7 +143,9 @@ const styles = {
     boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
     border: "1px solid #f0f0f0",
   },
-  header: { marginBottom: "20px" },
+  header: {
+    marginBottom: "20px",
+  },
   title: {
     margin: "0 0 12px 0",
     fontSize: "18px",
@@ -178,7 +176,7 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr", 
+    gridTemplateColumns: "1fr 1fr", // Forces 2 columns
     gap: "12px",
   },
   navBtn: {
@@ -188,6 +186,7 @@ const styles = {
     justifyContent: "center",
     padding: "20px 10px",
     borderRadius: "16px",
+    border: "none",
     fontWeight: "600",
     fontSize: "14px",
     cursor: "pointer",
