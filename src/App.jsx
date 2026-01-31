@@ -5,40 +5,54 @@ import DoctorLogin from "./components/DoctorLogin"
 import { useAuth } from "./context/AuthContext"
 import { listenAvailability, setAvailability } from "./services/availability"
 
-// THIS FILE IS STRICTLY FOR LOGIC. NO UI ELEMENTS ALLOWED.
 export default function App() {
   const { user, loading } = useAuth()
   const [available, setAvailable] = useState(false)
   
-  // 🛑 FIX IS HERE: Changed from 'true' to 'false'
-  // This prevents the "Loading..." loop even if the database is empty.
-  const [availabilityLoading, setAvailabilityLoading] = useState(false)
+  // Failsafe: If Google/Firebase is slow, we won't wait forever.
+  const [isTimeout, setIsTimeout] = useState(false)
+
+  useEffect(() => {
+    // If loading takes more than 2 seconds, force the app to open
+    const timer = setTimeout(() => {
+      setIsTimeout(true)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Listen to availability
   useEffect(() => {
     if (!user) return
     const unsubscribe = listenAvailability((value) => {
-      // If the database connects, update the status
       setAvailable(value)
-      // Ensure loading is off
-      setAvailabilityLoading(false)
     })
     return () => unsubscribe()
   }, [user])
 
-  // Function to toggle status
   async function toggleAvailability() {
-    // 🪄 MAGIC: Clicking this will RE-CREATE the deleted database file!
     await setAvailability(!available)
-    setAvailable(!available) // Update UI instantly
+    setAvailable(!available)
   }
 
-  // 1. Loading State (Auth)
-  if (loading) {
-    return <div style={{ padding: 20, textAlign: "center" }}>Loading App...</div>
+  // 1. LOADING SCREEN (Improved)
+  // We only show this if it's loading AND the timeout hasn't happened yet.
+  if (loading && !isTimeout) {
+    return (
+      <div className="container">
+        <Header />
+        <div style={{ 
+          padding: "60px 20px", 
+          textAlign: "center", 
+          color: "#64748b",
+          fontWeight: "500"
+        }}>
+          Starting Clinic App...
+        </div>
+      </div>
+    )
   }
 
-  // 2. Not Logged In -> Show Login
+  // 2. NOT LOGGED IN -> Show Login
   if (!user) {
     return (
       <div className="container">
@@ -48,13 +62,14 @@ export default function App() {
     )
   }
 
-  // 3. Logged In -> Show Panel
+  // 3. LOGGED IN -> Show Panel
   return (
     <div className="container">
       <Header />
       <DoctorPanel 
         available={available}
-        availabilityLoading={availabilityLoading}
+        // We pass 'false' to ensure the panel never blocks itself
+        availabilityLoading={false} 
         onToggleAvailability={toggleAvailability}
       />
     </div>
