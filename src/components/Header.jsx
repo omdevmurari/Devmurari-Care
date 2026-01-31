@@ -1,52 +1,91 @@
-import { signOut } from "firebase/auth"
-import { auth } from "../services/firebase"
 import { useAuth } from "../context/AuthContext"
+import { useState, useEffect } from "react"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "../services/firebase"
 
 export default function Header() {
-  const { user, role } = useAuth()
+  const { user, logout } = useAuth()
+  const [displayName, setDisplayName] = useState("Loading...")
 
-  async function handleLogout() {
-    await signOut(auth)
-  }
+  useEffect(() => {
+    async function getUserDetails() {
+      if (user) {
+        try {
+          const docRef = doc(db, "users", user.uid)
+          const docSnap = await getDoc(docRef)
+
+          if (docSnap.exists()) {
+            // 1. If we found the name in DB, show it (e.g. "Dr. Devmurari")
+            setDisplayName(docSnap.data().name || "Doctor")
+          } else {
+            // 2. If no DB record exists yet, assume it's the Doctor
+            setDisplayName("Doctor")
+          }
+        } catch (error) {
+          setDisplayName("Doctor")
+        }
+      }
+    }
+    getUserDetails()
+  }, [user])
 
   return (
-    <div className="header-card">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12
-        }}
-      >
-        <div>
-          <h1>Devmurari Care</h1>
-          <p>Your clinic, now digital</p>
-        </div>
-
+    <div style={styles.header}>
+      <div style={styles.textGroup}>
+        <h1 style={styles.title}>Devmurari Care</h1>
+        <p style={styles.subtitle}>Your clinic, now digital</p>
+        
         {user && (
-          <button
-            onClick={handleLogout}
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              padding: "10px 14px",
-              borderRadius: 12,
-              fontSize: 14,
-              color: "white"
-            }}
-          >
-            Logout
-          </button>
+          <div style={styles.roleTag}>
+            Logged in as <span style={{fontWeight: "700", color: "white"}}>{displayName}</span>
+          </div>
         )}
       </div>
 
       {user && (
-        <p style={{ marginTop: 12, fontSize: 14, opacity: 0.9 }}>
-          Logged in as{" "}
-          <strong>{role === "doctor" ? "Doctor" : "Patient"}</strong>
-        </p>
+        <button onClick={logout} style={styles.logoutBtn}>
+          Logout
+        </button>
       )}
     </div>
   )
+}
+
+const styles = {
+  header: {
+    background: "linear-gradient(135deg, #2563eb, #1e40af)",
+    color: "white",
+    padding: "24px",
+    borderRadius: "20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+    boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)"
+  },
+  textGroup: { display: "flex", flexDirection: "column", gap: "4px" },
+  title: { margin: 0, fontSize: "24px", fontWeight: "800", letterSpacing: "-0.5px" },
+  subtitle: { margin: 0, fontSize: "14px", opacity: 0.9, fontWeight: "400" },
+  
+  roleTag: { 
+    marginTop: "12px", 
+    fontSize: "13px", 
+    background: "rgba(255,255,255,0.2)", 
+    padding: "4px 10px", 
+    borderRadius: "20px",
+    width: "fit-content",
+    backdropFilter: "blur(4px)"
+  },
+
+  logoutBtn: {
+    background: "rgba(255,255,255,0.2)",
+    border: "1px solid rgba(255,255,255,0.3)",
+    color: "white",
+    padding: "10px 20px",
+    borderRadius: "12px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "all 0.2s"
+  }
 }
