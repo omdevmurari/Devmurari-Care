@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react"
 import { getInventory } from "../services/inventory"
-import PatientHistory from "./PatientHistory"
-import DashboardStats from "./DashboardStats"
 
-// --- RESTORED OLD IMPORTS ---
-import InventoryForm from "./InventoryForm"
 import InventoryList from "./InventoryList"
 import PrescriptionForm from "./PrescriptionForm"
 import BillList from "./BillList"
+import PatientHistory from "./PatientHistory"
+import DashboardStats from "./DashboardStats" // Import Analytics
 
 export default function DoctorPanel({
   available,
@@ -26,9 +24,9 @@ export default function DoctorPanel({
     loadInventory()
   }, [])
 
-  if (availabilityLoading) {
-    return <div style={styles.card}>Loading...</div>
-  }
+  // 🛑 DELETED THE BLOCKING LOADING SCREEN
+  // No more "if (availabilityLoading) return <Loading />"
+  // The app will opens immediately now.
 
   return (
     <div style={styles.appContainer}>
@@ -39,14 +37,22 @@ export default function DoctorPanel({
           <button
             style={{
               ...styles.statusBtn,
-              background: available 
-                ? "linear-gradient(135deg, #10b981, #059669)" 
-                : "linear-gradient(135deg, #ef4444, #dc2626)"
+              // If loading, show Grey. If online Green, else Red.
+              background: availabilityLoading 
+                ? "#94a3b8" 
+                : available 
+                  ? "linear-gradient(135deg, #10b981, #059669)" 
+                  : "linear-gradient(135deg, #ef4444, #dc2626)",
+              cursor: availabilityLoading ? "wait" : "pointer"
             }}
             onClick={onToggleAvailability}
+            disabled={availabilityLoading}
           >
             <span style={styles.dot}></span>
-            {available ? "You are Available" : "You are Offline"}
+            {availabilityLoading 
+              ? "Checking Status..." 
+              : available ? "You are Available" : "You are Offline"
+            }
           </button>
         </div>
 
@@ -80,23 +86,20 @@ export default function DoctorPanel({
 
       <div style={styles.contentArea}>
         {page === "home" && (
-          <div style={styles.card}>
-            <h3 style={styles.title}>Welcome Dr. Devmurari 👋</h3>
-            <p style={styles.muted}>
-              Select an option from the panel above to manage your clinic.
-            </p>
-            {/* 🔥 NEW ANALYTICS DASHBOARD */}
+          <>
+            <div style={styles.card}>
+              <h3 style={styles.title}>Welcome Dr. Devmurari 👋</h3>
+              <p style={styles.muted}>Here is your clinic's performance overview.</p>
+            </div>
+            {/* Analytics & Patient Search */}
             <DashboardStats />
-
-            {/* ADDED HERE: */}
             <PatientHistory />
-          </div>
+          </>
         )}
 
-        {/* --- RESTORED OLD LOGIC --- */}
         {page === "inventory" && (
           <>
-            <InventoryForm onAdded={loadInventory} />
+             {/* Note: passing inventory so it can check duplicates if needed in future */}
             <InventoryList items={inventory} refresh={loadInventory} />
           </>
         )}
