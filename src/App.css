@@ -1,0 +1,108 @@
+/* ---------- Base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eef2ff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+/* ---------- App ---------- */
+.app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+.panel-card {
+  text-align: center;
+}
+
+.content-card {
+  animation: fade 0.2s ease-in;
+}
+
+/* ---------- Buttons ---------- */
+button {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Availability */
+.status-btn {
+  width: 100%;
+  margin: 12px 0 16px;
+  color: white;
+}
+
+.status-btn.on {
+  background: #16a34a;
+}
+
+.status-btn.off {
+  background: #dc2626;
+}
+
+/* ---------- NAV GRID ---------- */
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.nav-grid button {
+  background: #93c5fd;
+  color: white;
+}
+
+.nav-grid button.active {
+  background: #2563eb;
+  box-shadow: 0 6px 16px rgba(37,99,235,0.35);
+}
+
+/* ---------- Inputs ---------- */
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+/* ---------- Text ---------- */
+.muted {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Tablet ---------- */
+@media (min-width: 768px) {
+  .app {
+    max-width: 720px;
+  }
+
+  .nav-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
