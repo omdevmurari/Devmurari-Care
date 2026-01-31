@@ -1,20 +1,22 @@
-import { doc, onSnapshot, updateDoc } from "firebase/firestore"
+import { doc, onSnapshot, setDoc } from "firebase/firestore"
 import { db } from "./firebase"
 
-const availabilityRef = doc(db, "availability", "main")
+// We use the ID 'status' for the availability document
+const availabilityRef = doc(db, "availability", "status")
 
-// 🔴 REAL-TIME LISTENER
 export function listenAvailability(callback) {
-  return onSnapshot(availabilityRef, (snapshot) => {
-    if (snapshot.exists()) {
-      callback(snapshot.data().isAvailable)
+  return onSnapshot(availabilityRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback(docSnap.data().online)
+    } else {
+      // If document is missing (deleted), default to Offline (false)
+      callback(false)
     }
   })
 }
 
-// 🔴 UPDATE VALUE
-export async function setAvailability(value) {
-  await updateDoc(availabilityRef, {
-    isAvailable: value
-  })
+export async function setAvailability(isOnline) {
+  // FIX: Use 'setDoc' with merge: true
+  // This Creates the document if it's missing, or Updates it if it exists.
+  await setDoc(availabilityRef, { online: isOnline }, { merge: true })
 }

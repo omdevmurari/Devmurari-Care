@@ -10,17 +10,17 @@ export default function App() {
   const { user, loading } = useAuth()
   const [available, setAvailable] = useState(false)
   
-  // FIX: Start as 'false' (Not Loading). 
-  // This ensures the app opens immediately even if the database is empty.
+  // 🛑 FIX IS HERE: Changed from 'true' to 'false'
+  // This prevents the "Loading..." loop even if the database is empty.
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
 
   // Listen to availability
   useEffect(() => {
     if (!user) return
     const unsubscribe = listenAvailability((value) => {
-      // If the database document exists, this updates the toggle.
-      // If it doesn't exist yet, it stays false (Offline).
+      // If the database connects, update the status
       setAvailable(value)
+      // Ensure loading is off
       setAvailabilityLoading(false)
     })
     return () => unsubscribe()
@@ -28,11 +28,12 @@ export default function App() {
 
   // Function to toggle status
   async function toggleAvailability() {
-    // This write operation will RECREATE the missing 'availability' collection automatically!
+    // 🪄 MAGIC: Clicking this will RE-CREATE the deleted database file!
     await setAvailability(!available)
+    setAvailable(!available) // Update UI instantly
   }
 
-  // 1. Loading State (Auth only)
+  // 1. Loading State (Auth)
   if (loading) {
     return <div style={{ padding: 20, textAlign: "center" }}>Loading App...</div>
   }
